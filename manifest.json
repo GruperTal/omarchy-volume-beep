@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "gruper.volume-beep",
+  "name": "Volume Beep",
+  "version": "1.0.0",
+  "author": "Tal Gruper",
+  "license": "MIT",
+  "repository": "https://github.com/GruperTal/omarchy-volume-beep",
+  "description": "A soft tone on your current output when the volume lands, so you hear the new level and which device it is.",
+  "kinds": [
+    "service"
+  ],
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7aa2f7"/>
+      <stop offset="1" stop-color="#bb9af7"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="770" cy="520" r="430" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#bb9af7" stop-opacity="0.30"/>
+      <stop offset="0.45" stop-color="#7aa2f7" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#7aa2f7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f2335"/>
+      <stop offset="1" stop-color="#16161e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="750" fill="url(#bg)"/>
+  <rect width="1200" height="750" fill="url(#glow)"/>
+
+  <!-- speaker mark + wordmark -->
+  <g transform="translate(232 150) scale(1.5)" fill="none" stroke="#c0caf5" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 38 H28 L52 18 V82 L28 62 H10 Z" fill="#c0caf5"/>
+    <path d="M68 36 Q79 50 68 64"/>
+    <path d="M82 24 Q101 50 82 76" opacity="0.55"/>
+  </g>
+  <text x="408" y="258" font-family="JetBrainsMono Nerd Font, JetBrains Mono, monospace" font-weight="800" font-size="92" letter-spacing="-2" fill="#c0caf5">Volume Beep</text>
+  <text x="600" y="352" text-anchor="middle" font-family="JetBrainsMono Nerd Font, JetBrains Mono, monospace" font-size="29" fill="#7f88b5">a soft tone when your volume lands</text>
+
+  <!-- the slider, and the tone where the knob came to rest -->
+  <rect x="200" y="513" width="800" height="14" rx="7" fill="#2b3050"/>
+  <rect x="200" y="513" width="570" height="14" rx="7" fill="url(#accent)"/>
+  <g fill="none" stroke="#bb9af7">
+    <circle cx="770" cy="520" r="62" stroke-width="5" opacity="0.60"/>
+    <circle cx="770" cy="520" r="104" stroke-width="4" opacity="0.32"/>
+    <circle cx="770" cy="520" r="150" stroke-width="3" opacity="0.14"/>
+  </g>
+  <circle cx="770" cy="520" r="27" fill="#16161e"/>
+  <circle cx="770" cy="520" r="21" fill="#c0caf5"/>
+</svg>

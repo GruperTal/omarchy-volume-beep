@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Portable checks: manifest shape, entry point, the tone file, and that
+# everything the service launches is an absolute path. Needs python3 and bash.
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+python3 - "$root" <<'PY'
+import array, json, re, sys, wave
+from pathlib import Path
+
+root = Path(sys.argv[1])
+m = json.loads((root / "manifest.json").read_text())
+for key in ("schemaVersion", "id", "name", "version", "author", "license", "description", "kinds", "entryPoints"):
+    assert m.get(key), f"manifest: missing {key}"
+assert re.fullmatch(r"[a-z0-9._-]+", m["id"]) and not m["id"].startswith("omarchy."), "manifest: bad id"
+assert re.fullmatch(r"\d+\.\d+\.\d+", m["version"]), "manifest: version is not semver"
+assert m["kinds"] == ["service"] and m["entryPoints"] == {"service": "Service.qml"}, "manifest: kinds/entryPoints"
+qml = (root / m["entryPoints"]["service"]).read_text()
+
+# Every program the service launches is named by absolute path.
+launched = re.findall(r'command:\s*\[\s*"([^"]+)"', qml) + re.findall(r'"(/usr/bin/[^"]+)"', qml)
+assert launched, "Service.qml: no launch found"
+for program in launched:
+    assert program.startswith("/usr/bin/"), f"Service.qml: {program} is not an absolute path"
+assert "clearEnvironment: true" in qml, "Service.qml: children must not inherit the environment"
+
+# The tone is what the README says it is, and it does not clip.
+with wave.open(str(root / "tick.wav")) as w:
+    assert (w.getframerate(), w.getnchannels(), w.getsampwidth()) == (48000, 2, 2), "tick.wav: not 48 kHz stereo s16"
+    seconds = w.getnframes() / w.getframerate()
+    peak = max(abs(s) for s in array.array("h", w.readframes(w.getnframes())))
+assert 0.05 < seconds < 1.0, f"tick.wav: {seconds:.2f}s is not a short tone"
+assert 3000 < peak < 32767, f"tick.wav: peak {peak} is silent or clipped"
+assert (root / "audio-volume-change.oga").stat().st_size > 0
+
+changelog = (root / "CHANGELOG.md").read_text()
+assert f"## {m['version']} " in changelog, "CHANGELOG.md: no entry for the manifest version"
+print(f"manifest {m['id']} {m['version']}, {len(set(launched))} absolute launch paths, tick.wav {seconds:.2f}s peak {peak}")
+PY
+
+bash -n "$root/tests/live"
+
+if command -v omarchy >/dev/null 2>&1; then
+  omarchy plugin validate "$root"
+fi
+
+printf 'All portable plugin checks passed.\n'
