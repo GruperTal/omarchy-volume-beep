@@ -1,13 +1,16 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 
-// Plays one soft tone on the current output once its volume has stopped
-// moving, so you hear the level you landed on and which device it is. Dragging
-// a slider or holding a key stays silent until the level rests.
+// Plays one soft tone on the current output when you set the volume in the
+// audio panel, once the level has stopped moving, so you hear the level you
+// landed on and which device it is. Dragging the slider stays silent until the
+// level rests, and the volume keys stay silent altogether.
 //
-// It watches one PipeWire sink and launches two fixed programs. Both are
+// It watches one PipeWire sink and Hyprland's layer events, and launches two
+// fixed programs. Both are
 // launched the same way: an absolute path, never a name resolved through an
 // inherited PATH, a closed environment holding only what the child needs, and
 // a deadline.
@@ -114,6 +117,25 @@ QtObject {
     onTriggered: root.resolve()
   }
 
+  // Only a change made with a bar panel open is answered. The plugin cannot see
+  // the slider, but Hyprland announces layer surfaces as they open and close:
+  // the bar's popup panels share one namespace and the volume OSD has its own.
+  // The volume keys always raise the OSD, so a level that lands while it is up
+  // came from the keyboard and stays silent even with a panel open.
+  property int panelsOpen: 0
+  property int osdsOpen: 0
+
+  property Connections layers: Connections {
+    target: Hyprland
+
+    function onRawEvent(event) {
+      if (event.name !== "openlayer" && event.name !== "closelayer") return
+      var step = event.name === "openlayer" ? 1 : -1
+      if (event.data === "omarchy-keyboard-panel") root.panelsOpen = Math.max(0, root.panelsOpen + step)
+      else if (event.data === "omarchy-osd") root.osdsOpen = Math.max(0, root.osdsOpen + step)
+    }
+  }
+
   // A device that just became the output reports its stored level as it binds.
   // That is not somebody changing the volume, so it stays silent.
   property double quietUntil: Date.now() + 1000
@@ -135,12 +157,12 @@ QtObject {
       var level = root.audio.volume
       if (Math.abs(level - root.heard) < 0.004) return
       root.heard = level
-      if (Date.now() >= root.quietUntil) root.landed.restart()
+      if (root.panelsOpen > 0 && Date.now() >= root.quietUntil) root.landed.restart()
     }
   }
 
   property Timer landed: Timer {
     interval: root.landedAfterMs
-    onTriggered: root.play()
+    onTriggered: if (root.osdsOpen === 0) root.play()
   }
 }

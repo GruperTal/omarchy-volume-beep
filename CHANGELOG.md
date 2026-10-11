@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 — 2026-10-11
+
+- The tone now answers only changes made with a bar panel open, which in
+  practice means the audio panel's slider. The volume keys, scrolling on the
+  bar icon and other mixers are silent.
+- Reads Hyprland's `openlayer` / `closelayer` events to know when a panel or
+  the volume OSD is on screen.
+
 ## 1.0.0 — 2026-10-11
 
 First release.

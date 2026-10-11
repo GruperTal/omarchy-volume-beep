@@ -6,19 +6,21 @@
   <a href="https://github.com/tcballard/omarchy-badges"><img alt="Built for Omarchy: Plugin" height="20" src="https://raw.githubusercontent.com/tcballard/omarchy-badges/75975e5b5bf75e7ede3764bcd2950046f7abfe2c/badges/v1/omarchy-plugin.svg"></a>
 </p>
 
-Change the volume and hear where it landed. One soft tone plays on your
-current output once the level stops moving, so you know how loud it is now and
-which device is actually playing: the monitor, the headphones or the laptop.
+Set the volume in the audio panel and hear where it landed. One soft tone
+plays on your current output once the level stops moving, so you know how loud
+it is now and which device is actually playing: the monitor, the headphones or
+the laptop.
 
 ![Volume Beep](preview.png)
 
 Windows does this when you let go of its volume slider, usually after a
 noticeable wait. This one answers about a fifth of a second after the level
-rests, and it works the same from the audio panel's slider, the volume keys
-and scrolling on the bar icon.
+rests.
 
-- Sliding, scrolling and holding a key are silent. You get one tone at the
-  end, at the level you chose.
+- Dragging the slider is silent. You get one tone at the end, at the level you
+  chose.
+- The volume keys are silent, and so is scrolling on the bar icon. The tone is
+  for the panel, where you went to look at the volume.
 - A device merely becoming the output is silent, and so are mute and shell
   start.
 - There is no bar widget and nothing to configure. It is a service.
@@ -35,12 +37,14 @@ and scrolling on the bar icon.
 omarchy plugin add https://github.com/GruperTal/omarchy-volume-beep.git --enable
 ```
 
-Then change the volume.
+Then open the audio panel from the bar and move the volume slider.
 
 ## Use
 
-Change the output volume any way you like. When it has held still for 180 ms
-you hear the tone at the new level.
+Open the audio panel from the bar and set the output volume: drag or click the
+slider, scroll on it, or use the panel's keyboard controls. When the level has
+held still for 180 ms you hear the tone at the new level. Closing the panel
+right after letting go does not cancel it.
 
 The tone is an ordinary stream on the default output, so it is exactly as
 loud as that output currently is. With a speaker tuning or EasyEffects in
@@ -69,20 +73,34 @@ Local edits make `omarchy plugin update` refuse until you stash or drop them.
 ## How it works
 
 `Service.qml` watches the volume of one PipeWire sink through Quickshell's
-PipeWire service. Each change restarts a 180 ms timer; when it fires, the
-service runs `pw-play` on `tick.wav`. A level reported twice is counted once,
-and changes in the first second after an output appears are ignored, because
-that is the device reporting its stored level.
+PipeWire service. Each change made while a bar panel is open restarts a 180 ms
+timer; when it fires, the service runs `pw-play` on `tick.wav`. A level
+reported twice is counted once, and changes in the first second after an
+output appears are ignored, because that is the device reporting its stored
+level.
+
+A plugin cannot see the audio panel's slider, so it reads Hyprland's
+`openlayer` and `closelayer` events instead. The bar's popup panels share the
+layer namespace `omarchy-keyboard-panel` and the volume OSD is `omarchy-osd`.
+A change counts only while a panel is open, and the tone is dropped if the OSD
+is up when the level lands. The volume keys always raise the OSD, so they stay
+silent even with the panel open.
 
 The sink it watches is the default output. When the default output is a DSP
 sink, it asks `omarchy-audio-output-sink` for the hardware sink underneath,
 the same resolution the volume keys and the audio panel use, and asks again
 every 15 seconds while a DSP sink is in front.
 
-Two limits worth knowing:
+Limits worth knowing:
 
 - A click on the slider that leaves the level unchanged is silent. Nothing
   outside the audio panel can see that click.
+- Scrolling on the bar icon is silent. It raises the same OSD the volume keys
+  do, and nothing tells the two apart from outside.
+- All bar popups share one layer namespace, so the plugin knows that a panel
+  is open, not which one. A volume change from something that shows no OSD,
+  such as another mixer or a headset's own buttons, sounds if any bar panel
+  happens to be open.
 - The tone's stream is named with the `omarchy_speaker_tuning` prefix. The
   stock audio panel hides that prefix from its per-app list, which keeps the
   tone from flashing a row there after every change. If the panel's filter
@@ -92,13 +110,13 @@ Two limits worth knowing:
 
 ```bash
 ./tests/run          # portable: manifest, entry point, launch paths, the tone file
-./tests/live         # on a running desktop: counts the tones for a press and a slide
+./tests/live         # on a running desktop: counts the tones with the panel closed and open
 omarchy plugin validate .
 ```
 
 `tests/run` needs only `python3` and `bash`; GitHub Actions runs it on every
-push. `tests/live` nudges your volume by 1% a few times and puts it back, and
-you will hear the tones.
+push. `tests/live` opens the audio panel for a few seconds, nudges your volume
+by 1% a few times and puts it back; you will hear the tones and see the OSD.
 
 ## Update
 
@@ -127,10 +145,11 @@ other Omarchy versions.
 ## Security and privacy
 
 Omarchy plugins run as unsandboxed code inside `omarchy-shell`. Review this
-repository before enabling it. It is about 150 lines of QML.
+repository before enabling it. It is about 170 lines of QML.
 
-The plugin reads the volume of one audio sink. It uses no network, writes no
-files and reads no input. It launches two programs, both by absolute path,
+The plugin reads the volume of one audio sink and the names of Hyprland layer
+surfaces as they open and close. It uses no network, writes no files and reads
+no input. It launches two programs, both by absolute path,
 with an environment cleared down to `PATH=/usr/bin`, `XDG_RUNTIME_DIR` and
 `LC_ALL=C`, and both with a 3 second deadline:
 
