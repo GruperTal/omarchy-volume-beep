@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 — 2026-10-11
+
+- New sound: a single soft harp note, a real recording from VSCO 2: Community
+  Edition by Versilian Studios (CC0). It replaces the KDE Ocean theme sound,
+  so nothing in the repository is tied to a desktop environment any more and
+  the CC-BY-SA files are gone.
+
 ## 1.1.0 — 2026-10-11
 
 - The tone now answers only changes made with a bar panel open, which in

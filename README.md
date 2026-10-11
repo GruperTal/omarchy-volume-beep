@@ -6,10 +6,10 @@
   <a href="https://github.com/tcballard/omarchy-badges"><img alt="Built for Omarchy: Plugin" height="20" src="https://raw.githubusercontent.com/tcballard/omarchy-badges/75975e5b5bf75e7ede3764bcd2950046f7abfe2c/badges/v1/omarchy-plugin.svg"></a>
 </p>
 
-Set the volume in the audio panel and hear where it landed. One soft tone
-plays on your current output once the level stops moving, so you know how loud
-it is now and which device is actually playing: the monitor, the headphones or
-the laptop.
+Set the volume in the audio panel and hear where it landed. One soft harp
+note plays on your current output once the level stops moving, so you know how
+loud it is now and which device is actually playing: the monitor, the
+headphones or the laptop.
 
 ![Volume Beep](preview.png)
 
@@ -56,11 +56,11 @@ audio panel really move.
 Both knobs are in the plugin folder,
 `~/.config/omarchy/plugins/gruper.volume-beep/`.
 
-- **Loudness.** `tick.wav` is generated from `audio-volume-change.oga`. Change
-  the dB and rerun; it takes effect on the next tone:
+- **Loudness.** `tick.wav` is generated from `harp-a4.wav`. Change the dB and
+  rerun; it takes effect on the next tone. Above 16 dB it clips:
 
   ```bash
-  ffmpeg -y -i audio-volume-change.oga -af "volume=26dB,alimiter=limit=0.89:level=0" -ar 48000 tick.wav
+  ffmpeg -y -i harp-a4.wav -af "atrim=0:0.7,afade=t=out:st=0.25:d=0.45,afade=t=in:d=0.012,lowpass=f=3000,volume=14.1dB" -ar 48000 tick.wav
   ```
 
   Any short 48 kHz WAV saved as `tick.wav` works if you want a different sound.
@@ -164,17 +164,18 @@ Report security problems through
 
 ## Third-party
 
-- `audio-volume-change.oga` is the volume sound of KDE's
-  [Ocean sound theme](https://invent.kde.org/plasma/ocean-sound-theme),
-  © 2023 Guilherme Marçal Silva,
-  [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/). It is
-  included unmodified.
-- `tick.wav` is that sound resampled to 48 kHz WAV, raised 26 dB and limited
-  to just under full scale. As an adaptation it is under CC-BY-SA-4.0 too.
+- The sound is a real harp, one plucked string (A4), from
+  [VSCO 2: Community Edition](https://github.com/sgossner/VSCO-2-CE) by
+  Versilian Studios, released under
+  [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Thank you to
+  them for giving it away.
+- `harp-a4.wav` is the first second of `Strings/Harp/KSHarp_A4_mf.wav` at
+  commit `4403009`, untouched. `tick.wav` is made from it with the command
+  under [Tuning](#tuning).
 - This is an independent community plugin, not affiliated with or endorsed by
-  KDE or Omarchy.
+  Versilian Studios or Omarchy.
 
 ## License
 
 The code, the logo and this documentation are [MIT](LICENSE). The two sound
-files are CC-BY-SA-4.0 as described above.
+files are CC0 1.0, public domain, as described above.

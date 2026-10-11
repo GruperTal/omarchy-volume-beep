@@ -32,7 +32,7 @@ with wave.open(str(root / "tick.wav")) as w:
     peak = max(abs(s) for s in array.array("h", w.readframes(w.getnframes())))
 assert 0.05 < seconds < 1.0, f"tick.wav: {seconds:.2f}s is not a short tone"
 assert 3000 < peak < 32767, f"tick.wav: peak {peak} is silent or clipped"
-assert (root / "audio-volume-change.oga").stat().st_size > 0
+assert (root / "harp-a4.wav").stat().st_size > 0
 
 changelog = (root / "CHANGELOG.md").read_text()
 assert f"## {m['version']} " in changelog, "CHANGELOG.md: no entry for the manifest version"

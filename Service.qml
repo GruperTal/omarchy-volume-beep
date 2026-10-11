@@ -4,7 +4,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 
-// Plays one soft tone on the current output when you set the volume in the
+// Plays one soft harp note on the current output when you set the volume in the
 // audio panel, once the level has stopped moving, so you hear the level you
 // landed on and which device it is. Dragging the slider stays silent until the
 // level rests, and the volume keys stay silent altogether.
@@ -20,13 +20,13 @@ QtObject {
   // How long the level must hold still before it counts as landed.
   readonly property int landedAfterMs: 180
 
-  // tick.wav is the volume sound of KDE's Ocean theme (audio-volume-change.oga,
-  // kept beside it; Guilherme Marçal Silva, CC-BY-SA-4.0) made much louder: as
-  // shipped it peaks at -16 dB and is hard to hear. It is raised 26 dB with a
-  // limiter holding the peaks just under full scale. To make it louder or
-  // softer, change the dB and rerun in this folder (takes effect on the next
-  // tone, no restart):
-  //   ffmpeg -y -i audio-volume-change.oga -af "volume=26dB,alimiter=limit=0.89:level=0" -ar 48000 tick.wav
+  // tick.wav is one plucked harp string, the A above middle C, from VSCO 2:
+  // Community Edition by Versilian Studios (CC0). harp-a4.wav beside it is the
+  // first second of that recording, untouched. The tone is that second with
+  // the pluck softened, the brightness rolled off and a long fade. To make it
+  // louder or softer, change the dB and rerun in this folder (takes effect on
+  // the next tone, no restart; above 16 dB it clips):
+  //   ffmpeg -y -i harp-a4.wav -af "atrim=0:0.7,afade=t=out:st=0.25:d=0.45,afade=t=in:d=0.012,lowpass=f=3000,volume=14.1dB" -ar 48000 tick.wav
   // The gain lives in the file rather than in `pw-play --volume` because
   // WirePlumber remembers stream volume per stream kind, shared with every
   // other sound of that kind.
